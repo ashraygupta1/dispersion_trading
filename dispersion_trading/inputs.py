@@ -32,7 +32,7 @@ vol_path = sampled_path + 'Imp_vol/'
 output_path = 'Data/Output/'
 
 #flag to save data
-save = 0
+save = 1
 
 #flag to read from already saved data. Should be false if save is true
 read_from_saved  = 1 & (not(save))
