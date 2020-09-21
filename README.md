@@ -25,7 +25,9 @@ The directory structure is as follows: <br />
 <br />
 
 # Running the code
-The raw datewise, tradewise data sits in DispersionDumps. The data has not been uploaded to this repository. Please add it and then run: <br />
+The raw datewise, tradewise data sits in DispersionDumps. The data has not been uploaded to this repository.<br />
+<b>Please add DispersionDumps folder to the Data folder before running.</b > <br />
+Then run:<br />
 > py main.py  <br />
 in folder dispersion_trading from Command Prompt <br />
 
