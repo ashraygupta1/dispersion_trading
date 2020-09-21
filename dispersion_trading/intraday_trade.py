@@ -3,12 +3,16 @@ This is our intraday trader which trades on implied correlations for now
 """
 
 import pandas as pd
+from datetime import datetime
 from constants import weightage, constituents, index_name, stock_names
 from inputs import all_dates, forbidden_dates, sampling_freq, amount, output_path
 from helper_fns import basket_weightage
 from correlations import DirtyCorrelation, CleanCorrelation, stationarity_test, make_stationary, thresholds_clean
 from trading_helper import action_market, PnL_Calc, tradewise_PnL
 from trading_helper import read_raw_data, read_sampled_data, read_call_put_data, read_imp_vol_data
+
+option_expiry_date_str = '2019-07-24 15:26:00'
+option_expiry_date = datetime.strptime(option_expiry_date_str, '%Y-%m-%d %H:%M:%S')
 
 def get_all_trading_data():
     print("\n***** \nRaw Data\n*****")
@@ -64,26 +68,27 @@ def intraday_trading_ledger():
     df_ledger_settled_all = pd.DataFrame()
     df_tradewise_PnL_all = pd.DataFrame()
     for i in range(len(corr_df)):
-        if( (position_held==1) | (position_held==-1)):
-            if( (corr_df['Corr'].iloc[i] <= thresholds.get('lower_exit') ) | ( corr_df['Corr'].iloc[i] >= thresholds.get('upper_exit') ) ):
+        if((position_held==1) | (position_held==-1)):
+            option_expiry_flag = (corr_df['Time'].iloc[i] == option_expiry_date) | (corr_df['Time'].iloc[i] == option_expiry_date_str )
+            if( (corr_df['Corr'].iloc[i] <= thresholds.get('lower_exit') ) | ( corr_df['Corr'].iloc[i] >= thresholds.get('upper_exit') ) 
+                | option_expiry_flag ):
                 exit_time = corr_df['Time'].iloc[i]
-                # try:
-                df_exit = action_market(exit_time, -position_held, scaled_weights, enter_time, df_calls, df_puts, df_all).reset_index()
-                print("\nEnter time: ",enter_time,"\nExit: ", exit_time,"\n Position: ", position_held)
-                position_held = 0
+                try:
+                    df_exit = action_market(exit_time, -position_held, scaled_weights, enter_time, df_calls, df_puts, df_all).reset_index()
+                    print("\nEnter time: ",enter_time,"\nExit: ", exit_time,"\n Position: ", position_held)
+                    position_held = 0
 
-                df_ledger_settled = PnL_Calc(df_entry, df_exit)
-                df_tradewise_PnL = tradewise_PnL(df_ledger_settled)
+                    df_ledger_settled = PnL_Calc(df_entry, df_exit)
+                    df_tradewise_PnL = tradewise_PnL(df_ledger_settled)
 
-                if(df_ledger_settled_all.empty):
-                    df_ledger_settled_all = df_ledger_settled
-                    df_tradewise_PnL_all = df_tradewise_PnL
-                else:
-                    df_ledger_settled_all = df_ledger_settled_all.append(df_ledger_settled)
-                    df_tradewise_PnL_all = df_tradewise_PnL_all.append(df_tradewise_PnL)
-                # except:
-                #     print("\nFailed :",exit_time)
-    #             break
+                    if(df_ledger_settled_all.empty):
+                        df_ledger_settled_all = df_ledger_settled
+                        df_tradewise_PnL_all = df_tradewise_PnL
+                    else:
+                        df_ledger_settled_all = df_ledger_settled_all.append(df_ledger_settled)
+                        df_tradewise_PnL_all = df_tradewise_PnL_all.append(df_tradewise_PnL)
+                except:
+                    print("\nFailed :",exit_time)
                     
         elif(position_held == 0 ):
             enter_time = corr_df['Time'].iloc[i]
@@ -94,8 +99,11 @@ def intraday_trading_ledger():
             elif corr_df['Corr'].iloc[i] >= thresholds.get('upper_enter') :
                 position_held = 1
                 df_entry = action_market(enter_time, position_held, scaled_weights, enter_time, df_calls, df_puts, df_all).reset_index()
-    
+
+    total_PnL = df_tradewise_PnL_all.PnL_total.sum()
+    print("\n****************************\nTotal Profit: {:.2f} %\n****************************\n".format( total_PnL / amount * 100 ))
+
     df_ledger_settled_all.to_csv(output_path + 'stockwise_position_PnL.csv')
-    df_tradewise_PnL.to_csv(output_path + 'Timewise_PnL_summary.csv')
+    df_tradewise_PnL_all.to_csv(output_path + 'Timewise_PnL_summary.csv')
 
     return df_ledger_settled_all,df_tradewise_PnL

@@ -48,6 +48,6 @@ def sampling(df, freq):
     df_sampled  = {}
     for stock in stock_names:
         df_t = df[stock].copy()        
-        s = minute_from_datetime(df_t.Time[0]) % freq
+        s = minute_from_datetime(df_t.Time.iloc[0]) % freq
         df_sampled[stock] = df_t[df_t.Time.apply(lambda x: minute_from_datetime(x) % freq == s )]
     return df_sampled

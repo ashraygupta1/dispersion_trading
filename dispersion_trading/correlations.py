@@ -68,7 +68,7 @@ def make_stationary(series):
 def thresholds_clean(Correl_series):
     mean = Correl_series.mean()
     std = Correl_series.std()
-    thresholds_dict = { 'lower_enter': mean - 2*std, 'lower_exit': mean - std, 'upper_enter': mean + 2*std, 'upper_exit' : mean + std}
+    thresholds_dict = { 'lower_enter': mean - 2*std, 'lower_exit': mean - 2*std, 'upper_enter': mean + 2*std, 'upper_exit' : mean + 2*std}
     for key in thresholds_dict:
         print(key, ": ", thresholds_dict[key])
     return thresholds_dict

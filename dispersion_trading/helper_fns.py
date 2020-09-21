@@ -18,7 +18,6 @@ def csv_to_df(path):
     df = {}
     for stock in stock_names:
         df[stock] = pd.read_csv(path+stock+'.csv')
-        print(stock, df[stock].shape)
     return df
 
 #as of October2019

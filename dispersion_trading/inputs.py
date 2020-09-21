@@ -10,8 +10,8 @@ can be set here
 import pandas as pd
 
 start_date = '07-01-2019'
-# end_date = '08-30-2019'
-end_date = '07-01-2019'
+end_date = '08-30-2019'
+# end_date = '07-02-2019'
 
 all_dates = pd.bdate_range(start=start_date, end = end_date)
 all_dates_str = all_dates.strftime('%Y%m%d')
@@ -35,4 +35,4 @@ output_path = 'Data/Output/'
 save = 0
 
 #flag to read from already saved data. Should be false if save is true
-read_from_saved  = 0 & (not(save))
+read_from_saved  = 1 & (not(save))
