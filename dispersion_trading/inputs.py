@@ -7,6 +7,7 @@ sampling frequency,
 total capital to trade 
 can be set here
 """
+
 import pandas as pd
 
 start_date = '07-01-2019'
